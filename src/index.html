@@ -4,20 +4,33 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vanilla App Template</title>
-    <link rel="stylesheet" href="./css/styles.css" />
+    <title>HW_3</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./css/index.css" />
+    <link rel="stylesheet" href="./css/gallery.css" />
   </head>
   <body>
-    <load src="./partials/header.html" icon-path="img/sprite.svg#logo" />
-
+   
     <main>
-      <!-- Loads the specified .html file -->
-      <load src="./partials/vite-promo.html" />
-      <load src="./partials/badges.html" />
+      <section class="weather">
+        <div class="container">
+          <form class="search-form js-search-form">
+            <input class="search-input js-search-input" type="text" name="user_query" required />
+            <button class="search-btn" type="submit">Search</button>
+          </form>
+          <div class="loader" style="display: none;">Loading...</div>
+          <ul class="gallery js-gallery"></ul>
+          
+        </div>
+      </section>
+      <script type="module" src="./js/pixabay-api.js"></script>
+      <script type="module" src="./js/render-functions.js"></script>
+    
     </main>
 
-    <load src="./partials/footer.html" />
+    
 
     <script type="module" src="./main.js"></script>
   </body>
+  
 </html>
