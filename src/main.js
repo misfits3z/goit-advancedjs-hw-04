@@ -18,104 +18,101 @@ let totalLoadedImages = 0;
 
 loadMore.style.display = 'none';
 
-// getPhotos('flowers').then(console.log).catch(console.error);
 
 searchFormEl.addEventListener("submit", handleSearch)
 
+let isFirstLoad = true;
 
-async function handleSearch(event){
+async function handleSearch(event) {
     event.preventDefault();
 
+    userQuery = event.currentTarget.elements.user_query.value.trim();
+    galleryEl.innerHTML = '';
+    loader.style.display = 'block';
+    loadMore.style.display = 'none';
 
-userQuery = event.currentTarget.elements.user_query.value.trim();
+    page = 1;
+    totalLoadedImages = 0;
 
-galleryEl.innerHTML = '';
+    try {
+        const { hits, totalHits: fetchedTotalHits } = await getPhotos(userQuery, true);
 
+        if (hits.length > 0) {
+            totalHits = fetchedTotalHits;
+            totalLoadedImages += hits.length;
 
-loader.style.display = 'block';
+            const galleryMarkup = createGalleryItems(hits);
+            galleryEl.insertAdjacentHTML('beforeend', galleryMarkup);
 
-loadMore.style.display = 'none';
+            initLightbox();
+            if (totalLoadedImages < totalHits) {
+                loadMore.style.display = 'block';
+            } else {
+                iziToast.info({
+                    message: `We're sorry, but you've reached the end of search results.`,
+                    position: "topRight",
+                    timeout: 2000,
+                    color: "lightblue",
+                    messageColor: "#FFFFFF",
+                });
+            }
+        }
+        if (!isFirstLoad) {
+            smoothScroll();
+        }
+        isFirstLoad = false; 
 
-page = 1;
-totalLoadedImages = 0;
-
-try{
-   const data = await getPhotos(userQuery, true);
-
-   if (data.length > 0){
-    totalHits = data.totalHits;
-    totalLoadedImages += data.length;
-
-
-    const galleryMarkup = createGalleryItems(data);
-    galleryEl.insertAdjacentHTML('beforeend', galleryMarkup); 
-
-    initLightbox();
-    loadMore.style.display = 'block';
-
-   }
-
-} catch(err){
-    console.log(err);
-} finally {
+    } catch (err) {
+        console.log(err);
+    } finally {
         loader.style.display = 'none';
         searchFormEl.reset();
     }
-};
-
+}
 
 loadMore.addEventListener('click', handleLoad);
 
 async function handleLoad() {
-    loader.style.display = 'block'; 
+    loader.style.display = 'block';
 
     try {
-        page += 1;
-        const data = await getPhotos(userQuery, false);
+        const { hits } = await getPhotos(userQuery, false);
 
-        if (data.length > 0) {
-            totalLoadedImages += data.length;
+        if (hits.length > 0) {
+            totalLoadedImages += hits.length;
 
-
-            const galleryMarkup = createGalleryItems(data);
+            const galleryMarkup = createGalleryItems(hits);
             galleryEl.insertAdjacentHTML('beforeend', galleryMarkup);
-            
+
             initLightbox();
         }
-        if (totalLoadedImages >= totalHits){
-            loadMore.style.display = 'none'
-            iziToast.error({
-                message: `We're sorry, but you've reached the end of search results`,
+        if (!isFirstLoad) {
+            smoothScroll();
+        }
+
+        if (totalLoadedImages >= totalHits) {
+            loadMore.style.display = 'none';
+            iziToast.info({
+                message: `We're sorry, but you've reached the end of search results.`,
                 position: "topRight",
                 timeout: 2000,
-                color: "lightblue",
+                color: "orange",
                 messageColor: "#FFFFFF",
             });
         }
     } catch (err) {
         console.log(err);
     } finally {
-        loader.style.display = 'none'; 
+        loader.style.display = 'none';
     }
 }
 
 
-
-// galleryEl.innerHTML = '';
-
-// const loader = document.querySelector('.loader');
-// loader.style.display = 'block';
-
-// getPhotos(userQuery).then(data => {
-//     // console.log(data.hits); 
-//     const galleryMarkup = createGalleryItems(data);
-//     galleryEl.insertAdjacentHTML('beforeend', galleryMarkup); 
-
-//     initLightbox();
-//   })
-//   .catch(console.error)
-//   .finally(() => {
-//     loader.style.display = 'none';
-//     form.reset();
-// });
-// }
+function smoothScroll() {
+    const { height: cardHeight } = galleryEl.firstElementChild.getBoundingClientRect();
+    
+    window.scrollBy({
+        top: cardHeight * 2, 
+        behavior: 'smooth', 
+    });
+}
