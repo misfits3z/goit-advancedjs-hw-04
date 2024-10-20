@@ -19,6 +19,9 @@ async function getPhotos(query, resetPage = false) {
                 q: query,
                 page: page,
                 per_page: 15,
+                image_type: 'photo',       
+                orientation: 'horizontal',  
+                safesearch: true
             }
         });
 
