@@ -1,9 +1,12 @@
 // 46457503-330abda4e6a20c9fb19d2e08a
 // https://pixabay.com/api/
 import { getPhotos } from "./js/pixabay-api";
-import {createGalleryItems, initLightbox} from "./js/render-functions";
+import {createGalleryItems} from "./js/render-functions";
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
+import SimpleLightbow from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
+
 
 
 const searchFormEl = document.querySelector('.js-search-form');
@@ -15,6 +18,7 @@ let userQuery = '';
 let page = 1;
 let totalHits = 0; 
 let totalLoadedImages = 0;
+let lightbox = new SimpleLightbow('.js-gallery a')
 
 loadMore.style.display = 'none';
 
@@ -27,6 +31,18 @@ async function handleSearch(event) {
     event.preventDefault();
 
     userQuery = event.currentTarget.elements.user_query.value.trim();
+
+    if (userQuery === '') {
+        iziToast.error({
+            message: `Please enter a valid search query.`,
+            position: "topRight",
+            timeout: 2000,
+            color: "#FF0000",
+            messageColor: "#FFFFFF",
+        });
+        return;
+    }
+
     galleryEl.innerHTML = '';
     loader.style.display = 'block';
     loadMore.style.display = 'none';
@@ -44,7 +60,8 @@ async function handleSearch(event) {
             const galleryMarkup = createGalleryItems(hits);
             galleryEl.insertAdjacentHTML('beforeend', galleryMarkup);
 
-            initLightbox();
+            lightbox.refresh();
+
             if (totalLoadedImages < totalHits) {
                 loadMore.style.display = 'block';
             } else {
@@ -57,10 +74,7 @@ async function handleSearch(event) {
                 });
             }
         }
-        if (!isFirstLoad) {
-            smoothScroll();
-        }
-        isFirstLoad = false; 
+       
 
     } catch (err) {
         console.log(err);
@@ -84,11 +98,12 @@ async function handleLoad() {
             const galleryMarkup = createGalleryItems(hits);
             galleryEl.insertAdjacentHTML('beforeend', galleryMarkup);
 
-            initLightbox();
+            lightbox.refresh();
         }
         if (!isFirstLoad) {
             smoothScroll();
         }
+        isFirstLoad = false; 
 
         if (totalLoadedImages >= totalHits) {
             loadMore.style.display = 'none';
